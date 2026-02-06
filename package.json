@@ -1,0 +1,13 @@
+{
+  "name": "repopaglu-monorepo",
+  "private": true,
+  "workspaces": [
+    "web",
+    "server"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=RepoPaglu-frontend",
+    "dev:server": "npm run dev --workspace=RepoPaglu-backend",
+    "install:all": "npm install"
+  }
+}
