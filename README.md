@@ -3,9 +3,9 @@
 > **The Ultimate AI-Powered Developer Tool Suite.**
 > Generate READMEs, API Documentation, and analyze Tech Stacks with the power of Groq Llama AI.
 
-    ![alt text](Screenshot%202026-02-06%20170707.png)
+![alt text](Screenshot%202026-02-06%20170707.png)
 
-    ![alt text](Screenshot%202026-02-06%20170739.png)
+![alt text](Screenshot%202026-02-06%20170739.png)
 
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
