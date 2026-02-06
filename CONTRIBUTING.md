@@ -26,11 +26,6 @@ This section guides you through submitting an enhancement suggestion for RepoPag
 - **Provide a step-by-step description of the suggested enhancement** in as much detail as possible.
 - **Explain why this enhancement would be useful** to most RepoPaglu users.
 
-### Your First Code Contribution
-
-Unsure where to begin contributing to RepoPaglu? You can start by looking through these `good first issue` and `help wanted` issues:
-- [Good First Issues](https://github.com/Rohan-2601/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"good+first+issue")
-- [Help Wanted Issues](https://github.com/Rohan-2601/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"help+wanted")
 
 ### Pull Request Process
 
