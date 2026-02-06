@@ -4,7 +4,7 @@ export function createRateLimiter({ windowMs, max }) {
   return rateLimit({
     windowMs,
     max,
-    standardHeaders: true,       // Adds `RateLimit-*` headers
+    standardHeaders: true,       
     legacyHeaders: false,
     message: {
       success: false,

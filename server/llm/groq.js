@@ -5,9 +5,7 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-/**
- * Generic text generation function (used by README, API docs, Tech Stack)
- */
+
 export async function generateWithHF(prompt) {
   const res = await groq.chat.completions.create({
   model: "llama-3.1-8b-instant",
@@ -20,9 +18,7 @@ export async function generateWithHF(prompt) {
   return res.choices[0].message.content;
 }
 
-/**
- * Generate tests for ONE batch
- */
+
 export async function generateTestsForBatch(batch) {
   const prompt = createBatchPrompt(batch);
   const output = await generateWithHF(prompt);

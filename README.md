@@ -17,9 +17,9 @@
 
 ## 📖 Introduction
 
-**RepoPaglu** is a modern, full-stack monorepo application designed to streamline developer workflows using advanced AI. By leveraging **Groq's Llama AI**, RepoPaglu provides a suite of tools to automate tedious documentation tasks and provide deep insights into codebases.
+**RepoPaglu** is a modern, full-stack monorepo application designed to streamline developer workflows using advanced AI. By leveraging **Groq's Llama AI**, RepoPaglu provides a suite of tools to automate tedious documentation tasks and provide deep insights into codebases and also generate jest test cases for your code. 
 
-Whether you need a professional README in seconds, comprehensive API documentation, or a breakdown of a project's technology stack, RepoPaglu delivers it through a sleek, responsive interface.
+Whether you need a professional README in seconds, comprehensive API documentation, generate jest test cases for your code or a breakdown of a project's technology stack, RepoPaglu delivers it all through a sleek, responsive interface.
 
 ## ✨ Key Features
 

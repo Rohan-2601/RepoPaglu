@@ -1,7 +1,4 @@
-/**
- * Create a safe prompt for generating NDJSON tests.
- * This version prevents hallucinations and invalid JSON.
- */
+
 export function createBatchPrompt(batch) {
   return `
 You are a strict JSON generator. 
