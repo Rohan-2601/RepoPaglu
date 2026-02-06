@@ -3,11 +3,10 @@
 > **The Ultimate AI-Powered Developer Tool Suite.**
 > Generate READMEs, API Documentation, and analyze Tech Stacks with the power of Groq Llama AI.
 
-    ![alt text](<Screenshot 2026-02-06 170707.png>)
+    ![alt text](Screenshot%202026-02-06%20170707.png)
 
-    ![alt text](<Screenshot 2026-02-06 170739.png>)
+    ![alt text](Screenshot%202026-02-06%20170739.png)
 
-![RepoPaglu Banner](https://via.placeholder.com/1200x400?text=RepoPaglu+AI+Tools)
 
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![Monorepo](https://img.shields.io/badge/Monorepo-Enabled-purple)](https://github.com/lerna/lerna)
@@ -86,7 +85,7 @@ RepoPaglu/
 Clone the repository and install dependencies for all workspaces from the root:
 
 ```bash
-git clone https://github.com/your-username/RepoPaglu.git
+git clone https://github.com/Rohan-2601/RepoPaglu.git
 cd RepoPaglu
 npm install
 ```
@@ -100,7 +99,7 @@ Create `.env` files in both `web` and `server` directories.
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/repopaglu
 JWT_SECRET=your_super_secret_key
-GEMINI_API_KEY=your_gemini_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
 **Frontend (`web/.env`):**

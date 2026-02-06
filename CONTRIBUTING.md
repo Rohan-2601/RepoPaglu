@@ -29,8 +29,8 @@ This section guides you through submitting an enhancement suggestion for RepoPag
 ### Your First Code Contribution
 
 Unsure where to begin contributing to RepoPaglu? You can start by looking through these `good first issue` and `help wanted` issues:
-- [Good First Issues](https://github.com/your-username/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"good+first+issue")
-- [Help Wanted Issues](https://github.com/your-username/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"help+wanted")
+- [Good First Issues](https://github.com/Rohan-2601/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"good+first+issue")
+- [Help Wanted Issues](https://github.com/Rohan-2601/RepoPaglu/issues?q=is%3Aopen+is%3Aissue+label%3A"help+wanted")
 
 ### Pull Request Process
 
@@ -59,7 +59,7 @@ Unsure where to begin contributing to RepoPaglu? You can start by looking throug
 See the [README.md](./README.md) for detailed instructions on setting up the project locally.
 
 ```bash
-git clone https://github.com/your-username/RepoPaglu.git
+git clone https://github.com/Rohan-2601/RepoPaglu
 cd RepoPaglu
 npm install
 npm run dev:web   # Start Frontend
