@@ -327,20 +327,73 @@ export default function TechStackPage() {
   const [error, setError] = useState("");
   const [report, setReport] = useState<any>(null);
 
+  const [streamData, setStreamData] = useState("");
+
   const handleGenerate = async () => {
     if (!repo) {
       setError("Please enter a GitHub repo URL.");
       return;
     }
+    if (!localStorage.getItem("token")) return router.push("/auth/login");
+
     setError("");
     setReport(null);
     setLoading(true);
+    setStreamData("// Initializing analysis...\n");
 
     try {
-      const res = await api.post("api/tech", { repo });
-      setReport(res.data.report);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/tech`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ repo }),
+      });
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let rawAccumulated = "";
+
+      while (!done) {
+        const { value, done: DONE } = await reader.read();
+        done = DONE;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n\n");
+          
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const dataStr = line.replace("data: ", "").trim();
+              if (dataStr === "[DONE]") {
+                done = true;
+                break;
+              }
+              try {
+                const { content } = JSON.parse(dataStr);
+                if (content) {
+                   setStreamData(prev => (prev + content).slice(-500)); // Keep only last 500 chars for terminal effect
+                   rawAccumulated += content;
+                }
+              } catch (e) {}
+            }
+          }
+        }
+      }
+
+      // Final parse
+      try {
+        const finalJson = JSON.parse(rawAccumulated);
+        setReport(finalJson);
+      } catch (e) {
+        setError("Failed to parse analysis results.");
+      }
+
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to analyze tech stack.");
+      setError("Failed to analyze tech stack.");
     }
 
     setLoading(false);
@@ -400,15 +453,19 @@ export default function TechStackPage() {
         </button>
       </motion.div>
 
-      {/* Loading Skeleton */}
+      {/* Streaming Terminal View */}
       {loading && (
-        <div className="w-full max-w-3xl space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="w-full h-24 bg-gray-50 dark:bg-gray-900 animate-pulse rounded-2xl border border-gray-200 dark:border-gray-800"
-            />
-          ))}
+        <div className="w-full max-w-3xl rounded-xl bg-[#0d1117] border border-gray-800 p-6 shadow-2xl font-mono text-sm overflow-hidden">
+          <div className="flex items-center gap-2 mb-4 border-b border-gray-800 pb-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"/>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"/>
+            <div className="w-3 h-3 rounded-full bg-green-500"/>
+            <span className="ml-2 text-gray-500 text-xs">analysis_terminal — zsh</span>
+          </div>
+          <div className="text-green-400 whitespace-pre-wrap break-all h-64 overflow-y-auto font-mono">
+            {streamData}
+            <span className="animate-pulse">_</span>
+          </div>
         </div>
       )}
 

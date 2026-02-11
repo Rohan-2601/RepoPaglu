@@ -1,53 +1,19 @@
 
 export function createBatchPrompt(batch) {
   return `
-You are a strict JSON generator. 
-Your job is to produce **ONLY NDJSON**, where each line is one valid JSON object.
+SYSTEM: You are a high-performance code test generator. 
+OUTPUT FORMAT: NDJSON (Newline Delimited JSON).
+STRICT RULES:
+1. One valid JSON object per line.
+2. Structure: {"file": "<path>", "test": "<jest_code>"}
+3. Escape all quotes/newlines in "test" string.
+4. NO MARKDOWN. NO EXPLANATIONS. ONLY JSON.
 
-### HARD RULES — MUST FOLLOW
-- Output ONLY NDJSON lines.
-- One JSON object per line.
-- Each line MUST be valid JSON.
-- Each object MUST contain ONLY: { "file": "...", "test": "..." }
-- DO NOT output explanations.
-- DO NOT output code fences.
-- DO NOT output markdown.
-- DO NOT output commentary.
-- DO NOT output multi-line JSON.
-- DO NOT output JavaScript outside of the JSON string.
-- DO NOT write multiple objects in one line.
-- DO NOT write blank lines.
-
-### JSON SAFETY RULES
-- ALWAYS escape quotes inside the "test" string.
-- ALWAYS escape newlines as \\n inside JSON.
-- NEVER include backticks.
-- NEVER include template literals like \`...\`.
-- NEVER include unescaped "${" or "}" inside the JSON structure.
-
-### NDJSON TEMPLATE (MUST FOLLOW EXACTLY)
-{"file": "<path>", "test": "<jest test code escaped properly>"}
-
-### FILES TO PROCESS:
+FILES TO PROCESS:
 ${batch
-  .map((f) => {
-    return `
-FILE: ${f.file}
+  .map((f) => `FILE: ${f.file}\nCODE:\n${f.code.slice(0, 10000)}`) // Truncate very large code blocks safely
+  .join("\n\n")}
 
-SUMMARY:
-${f.summary}
-
-CONTEXT:
-${Array.isArray(f.context) ? f.context.join("\n") : ""}
-
-SOURCE (READ ONLY):
-${f.code}
-`;
-  })
-  .join("\n")}
-
-### NOW GENERATE:
-Output EXACTLY one NDJSON line per file.
-Begin output immediately.
+GENERATE TESTS NOW (NDJSON):
   `.trim();
 }

@@ -20,15 +20,63 @@ export default function ReadmeGenerator() {
 
   const handleGenerate = async () => {
     if (!repo) return setError("Please enter a GitHub repo URL.");
+    if (!localStorage.getItem("token")) return router.push("/auth/login");
+
     setError("");
     setLoading(true);
     setReadme("");
 
     try {
-      const res = await api.post("api/readme", { repo });
-      setReadme(res.data.readme);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/readme`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ repo }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to start generation");
+      }
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+
+      while (!done) {
+        const { value, done: DONE } = await reader.read();
+        done = DONE;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          // Parse SSE format: "data: {...}"
+          const lines = chunk.split("\n\n");
+          
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const dataStr = line.replace("data: ", "").trim();
+              if (dataStr === "[DONE]") {
+                done = true; 
+                break;
+              }
+              try {
+                const { content } = JSON.parse(dataStr);
+                if (content) {
+                   setReadme((prev) => prev + content);
+                }
+              } catch (e) {
+                // ignore incomplete chunks or keep-alive
+              }
+            }
+          }
+        }
+      }
+
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to generate README.");
+      console.error(err);
+      setError("Failed to generate README.");
     }
 
     setLoading(false);

@@ -6,10 +6,6 @@ export class TestGenerator {
     this.batches = batches; // array of batches (each contains multiple files)
   }
 
-  /**
-   * Process all batches sequentially.
-   * You can make this parallel later.
-   */
   async run() {
     const allTests = [];
 
@@ -17,20 +13,20 @@ export class TestGenerator {
 
     for (const batch of this.batches) {
       batchIndex++;
-      console.log(`🧪 Processing batch ${batchIndex}/${this.batches.length}...`);
+      console.log(`[RepoPaglu] Processing batch ${batchIndex}/${this.batches.length}...`);
 
       try {
         const result = await generateTestsForBatch(batch);
 
         if (!Array.isArray(result)) {
-          console.warn("⚠ Bad batch result:", result);
+          console.warn("[RepoPaglu] Bad batch result:", result);
           continue;
         }
 
         // Normalize results
         for (const item of result) {
           if (!item.file || !item.test) {
-            console.warn("⚠ Skipping invalid test item:", item);
+            console.warn("[RepoPaglu] Skipping invalid test item:", item);
             continue;
           }
 
@@ -41,7 +37,7 @@ export class TestGenerator {
         }
 
       } catch (err) {
-        console.error(`❌ Batch ${batchIndex} failed:`, err.message);
+        console.error(`[RepoPaglu] Batch ${batchIndex} failed:`, err.message);
       }
     }
 

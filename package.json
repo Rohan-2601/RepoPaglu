@@ -6,6 +6,7 @@
     "server"
   ],
   "scripts": {
+    "dev": "echo \"Use 'npm run dev:web' or 'npm run dev:server'\" && exit 1",
     "dev:web": "npm run dev --workspace=RepoPaglu-frontend",
     "dev:server": "npm run dev --workspace=RepoPaglu-backend",
     "install:all": "npm install"

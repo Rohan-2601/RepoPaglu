@@ -18,6 +18,18 @@ export async function generateWithHF(prompt) {
   return res.choices[0].message.content;
 }
 
+export async function streamWithHF(prompt) {
+  const stream = await groq.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.2,
+    max_tokens: 2000,
+    stream: true,
+  });
+
+  return stream;
+}
+
 
 export async function generateTestsForBatch(batch) {
   const prompt = createBatchPrompt(batch);

@@ -24,21 +24,74 @@ export default function ApiDocsPage() {
     setOpen(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const [streamData, setStreamData] = useState("");
+
   const handleGenerate = async () => {
     if (!repo) return setError("Paste a GitHub repo URL.");
+    if (!localStorage.getItem("token")) return router.push("/auth/login");
+
     setError("");
     setLoading(true);
+    setDocs([]);
+    setStreamData("// Scanning controllers...\n");
 
     try {
-      const res = await api.post("api/docs", { repo });
-      if (!Array.isArray(res.data.docs)) {
-        setError("Invalid docs format returned by backend.");
-        setLoading(false);
-        return;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"}/api/docs`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({ repo }),
+      });
+
+      if (!response.body) throw new Error("No response body");
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let rawAccumulated = "";
+
+      while (!done) {
+        const { value, done: DONE } = await reader.read();
+        done = DONE;
+        if (value) {
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n\n");
+          
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const dataStr = line.replace("data: ", "").trim();
+              if (dataStr === "[DONE]") {
+                done = true;
+                break;
+              }
+              try {
+                const { content } = JSON.parse(dataStr);
+                if (content) {
+                   setStreamData(prev => (prev + content).slice(-500)); 
+                   rawAccumulated += content;
+                }
+              } catch (e) {}
+            }
+          }
+        }
       }
-      setDocs(res.data.docs);
+
+      // Final parse
+      try {
+        const finalJson = JSON.parse(rawAccumulated);
+        if (Array.isArray(finalJson)) {
+            setDocs(finalJson);
+        } else {
+            setError("Invalid format returned.");
+        }
+      } catch (e) {
+        setError("Failed to parse API docs.");
+      }
+
     } catch (err: any) {
-      setError(err.response?.data?.error || "Failed to generate docs");
+      setError("Failed to generate docs");
     }
 
     setLoading(false);
@@ -82,6 +135,22 @@ export default function ApiDocsPage() {
           {loading ? "Generating..." : "Generate Docs"}
         </button>
       </div>
+
+       {/* Streaming Terminal View */}
+      {loading && (
+        <div className="mt-10 w-full max-w-3xl rounded-xl bg-[#0d1117] border border-gray-800 p-6 shadow-2xl font-mono text-sm overflow-hidden">
+          <div className="flex items-center gap-2 mb-4 border-b border-gray-800 pb-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"/>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"/>
+            <div className="w-3 h-3 rounded-full bg-green-500"/>
+            <span className="ml-2 text-gray-500 text-xs">api_scanner — zsh</span>
+          </div>
+          <div className="text-blue-400 whitespace-pre-wrap break-all h-64 overflow-y-auto font-mono">
+            {streamData}
+            <span className="animate-pulse">_</span>
+          </div>
+        </div>
+      )}
 
       {/* Docs Output */}
       <div className="mt-12 w-full max-w-4xl space-y-6">

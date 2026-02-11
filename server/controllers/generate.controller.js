@@ -21,14 +21,14 @@ export const generateController = async (req, res) => {
       });
     }
 
-    console.log("⚡ Received repo:", repo);
+    console.log("Received repo:", repo);
 
     // Clone the repository
     repoPath = await cloneRepo(repo);
 
     // Extract valid project files
     const files = await extractAndFilterFiles(repoPath);
-    console.log(`📄 Filtered files: ${files.length}`);
+    console.log(` Filtered files: ${files.length}`);
 
     if (files.length === 0) {
       return res.status(400).json({
@@ -41,31 +41,31 @@ export const generateController = async (req, res) => {
     const dependencyGraph = buildDependencyGraph(files, repoPath);
 
     // Generate summaries per file
-    console.log("📝 Creating summaries...");
+    console.log(" Creating summaries...");
     const summaries = {};
     for (const file of files) {
       summaries[file.relative] = generateSummary(file, dependencyGraph);
     }
 
     // Embedding store
-    console.log("🧠 Indexing summaries...");
+    console.log("Indexing summaries...");
     const store = new EmbeddingStore();
     for (const file of files) {
       await store.add(file.relative, summaries[file.relative]);
     }
 
     // RAG Engine
-    console.log("🔍 Initializing RAG engine...");
+    console.log(" Initializing RAG engine...");
     const rag = new RagEngine(store, dependencyGraph);
 
     // Batcher
-    console.log("📦 Creating batches...");
+    console.log(" Creating batches...");
     const batcher = new Batcher(files, summaries, rag);
     const batches = await batcher.createBatches();
-    console.log(`📦 Total batches: ${batches.length}`);
+    console.log(` Total batches: ${batches.length}`);
 
     // Test generation (LLM)
-    console.log("🤖 Generating tests...");
+    console.log(" Generating tests...");
     const generator = new TestGenerator(batches);
     const testFiles = await generator.run();
 
@@ -88,7 +88,7 @@ export const generateController = async (req, res) => {
     return res.status(200).send(zipBuffer);
 
   } catch (err) {
-    console.error("❌ Test Generation Controller Error:", err);
+    console.error("Test Generation Controller Error:", err);
 
     // Respect structured errors from AI service
     const status = err.status || 500;
@@ -101,7 +101,7 @@ export const generateController = async (req, res) => {
   } finally {
     if (repoPath) {
       await cleanupTemp(repoPath).catch(() => {
-        console.error("🧹 Temp cleanup failed during test generation.");
+        console.error(" Temp cleanup failed during test generation.");
       });
     }
   }

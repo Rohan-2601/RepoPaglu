@@ -1,3 +1,3 @@
 export function log(...args) {
-  console.log("[TestForge]", ...args);
+  console.log("[RepoPaglu]", ...args);
 }

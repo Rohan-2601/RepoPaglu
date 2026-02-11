@@ -1,49 +1,65 @@
-import { generateWithHF } from "../llm/groq.js";
+import { generateWithHF, streamWithHF } from "../llm/groq.js";
 
 /**
- * Generate README.md content using Hugging Face
+ * Generate README.md content using Hugging Face (Streamed)
  */
-export async function generateReadmeContent(files, summaries) {
-  const summaryText = Object.values(summaries).join("\n\n");
+export async function generateReadmeContent(context, res) {
+  const { packageJson, fileTree, keyModules } = context;
 
   const prompt = `
 Write a clean, professional README.md for this project.
 
-Guidelines:
-- Include project description
-- Include features list
-- Include API endpoints (if any)
-- Include folder structure
-- Include setup instructions
-- Include installation & running instructions
-- Include tech stack
-- Explain key modules
-- Use GitHub-friendly markdown formatting
-- Keep it concise but professional
+### Project Metadata
+**Package.json**: 
+\`\`\`json
+${packageJson.slice(0, 5000)}
+\`\`\`
 
-Here are summaries of all files in the repo:
-${summaryText}
+**Project Structure**:
+\`\`\`text
+${fileTree}
+\`\`\`
+
+**Key Modules/Folders**:
+${keyModules.join(", ")}
+
+### Guidelines:
+- Use the package.json to identify Name, Description, Scripts, and Dependencies.
+- Use the Folder Tree to explain the project structure.
+- Write a professional "Features" section based on dependencies (e.g. Express = Web Server, React = UI).
+- Include standard sections: Install, Usage, API (if applicable), Tech Stack.
+- Keep it concise.
 
 Begin now:
 `.trim();
 
   try {
-    let content = await generateWithHF(prompt);
-
-    // Clean accidental markdown fences
-    content = content
-      .replace(/```markdown/gi, "")
-      .replace(/```/g, "")
-      .trim();
-
-    return content;
+    if (res) {
+      // Streaming Mode
+      const stream = await streamWithHF(prompt);
+      
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+      
+      res.write(`data: [DONE]\n\n`);
+      res.end();
+      
+    } else {
+      // Legacy Block Mode (for internal use)
+      let content = await generateWithHF(prompt);
+      return content.replace(/```markdown/gi, "").replace(/```/g, "").trim();
+    }
 
   } catch (error) {
     console.error("🔥 AI README Generator Error:", error);
-
-    throw {
-      status: 500,
-      message: "Failed to generate README due to an AI error.",
-    };
+    if (res) {
+       res.write(`data: ${JSON.stringify({ error: "Failed to generate README" })}\n\n`);
+       res.end();
+    }
+    throw error;
   }
 }

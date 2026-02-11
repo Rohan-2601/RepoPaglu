@@ -4,16 +4,51 @@ import { generateWithHF } from "../llm/groq.js";
  * Collect content from project files
  */
 export function collectProjectFiles(files) {
-  return files.map(f => ({
-    file: f.relative,
-    content: f.content
-  }));
+  const RELEVANT_FILES = new Set([
+    "package.json",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "dockerfile",
+    "docker-compose.yml",
+    "docker-compose.yaml",
+    "README.md",
+    "tsconfig.json",
+    "jsconfig.json",
+    "next.config.js",
+    "vite.config.js", 
+    "webpack.config.js",
+    "vercel.json",
+    "netlify.toml",
+    ".env.example",
+    "go.mod",
+    "cargo.toml",
+    "gemfile",
+    "requirements.txt",
+    "pom.xml",
+    "build.gradle"
+  ]);
+
+  return files
+    .filter(f => {
+      const lowerMap = f.relative.toLowerCase();
+      const fileName = lowerMap.split(/[\\/]/).pop();
+      
+      // 1. Include exact config matches
+      if (RELEVANT_FILES.has(fileName)) return true;
+
+      // 2. Include high-level entry points
+      if (fileName.match(/^(app|server|index|main)\.(js|ts|py|go|java)$/)) return true;
+
+      return false;
+    })
+    .map(f => ({
+      file: f.relative,
+      content: f.content
+    }));
 }
 
-/**
- * Generate STRUCTURED TECH STACK REPORT using Hugging Face
- */
-export async function generateTechStackReport(projectFiles) {
+export async function generateTechStackReport(projectFiles, res) {
   const prompt = `
 You are a senior software architect.
 
@@ -57,6 +92,23 @@ ${projectFiles
 `.trim();
 
   try {
+    if (res) {
+      // Streaming Mode
+      const stream = await streamWithHF(prompt);
+
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content || "";
+        if (content) {
+          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        }
+      }
+
+      res.write(`data: [DONE]\n\n`);
+      res.end();
+      return;
+    }
+
+    // Legacy Mode
     let text = await generateWithHF(prompt);
 
     // Clean accidental fences
@@ -69,7 +121,7 @@ ${projectFiles
     try {
       data = JSON.parse(text);
     } catch {
-      console.error("❌ AI returned invalid JSON for tech stack:", text);
+      console.error(" AI returned invalid JSON for tech stack:", text);
       throw {
         status: 500,
         message: "AI returned invalid JSON for tech stack.",
@@ -80,7 +132,10 @@ ${projectFiles
 
   } catch (error) {
     console.error("🔥 AI service failed while generating tech stack:", error);
-
+    if (res) {
+        res.write(`data: ${JSON.stringify({ error: "Failed to generate tech stack" })}\n\n`);
+        res.end();
+    }
     throw {
       status: 500,
       message: "AI service failed while generating tech stack.",

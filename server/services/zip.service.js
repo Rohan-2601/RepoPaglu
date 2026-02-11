@@ -1,11 +1,6 @@
 import AdmZip from "adm-zip";
 import path from "path";
 
-/**
- * Convert a source file path (e.g. "/src/app.js")
- * into a test file path inside the ZIP.
- * Example: tests/src/app.test.js
- */
 function convertToTestPath(originalPath) {
   if (!originalPath) return null;
 
@@ -16,12 +11,8 @@ function convertToTestPath(originalPath) {
   return `tests${base}.test${ext}`;
 }
 
-/**
- * Creates an in-memory ZIP buffer containing test files.
- * NO files written to disk.
- */
 export async function createZipBuffer(testFiles) {
-  console.log("📦 Creating ZIP in memory...");
+  console.log(" Creating ZIP in memory...");
 
   const zip = new AdmZip();
 
@@ -43,9 +34,3 @@ export async function createZipBuffer(testFiles) {
   // Return raw ZIP buffer (no writing to disk)
   return zip.toBuffer();
 }
-
-
-
-
-
-

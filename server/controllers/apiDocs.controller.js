@@ -30,24 +30,27 @@ export const apiDocsController = async (req, res) => {
       });
     }
 
-    // Generate API documentation
-    const docs = await generateApiDocs(controllers);
+    // Set headers for SSE
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
 
-    return res.status(200).json({
-      success: true,
-      docs,
-    });
+    // Generate API documentation (Streamed)
+    await generateApiDocs(controllers, res);
+
+    // Note: cleanup happens in finally block
 
   } catch (err) {
     console.error("API Docs Error:", err);
-
-    // Handle structured errors thrown by services
-    const status = err.status || 500;
-
-    return res.status(status).json({
-      success: false,
-      message: err.message || "Something went wrong while generating API docs.",
-    });
+    if (!res.headersSent) {
+      const status = err.status || 500;
+      return res.status(status).json({
+        success: false,
+        message: err.message || "Failed to generate API docs."
+      });
+    } else {
+        res.end();
+    }
 
   } finally {
     if (repoPath) {

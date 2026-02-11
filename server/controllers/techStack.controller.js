@@ -31,25 +31,27 @@ export const techStackController = async (req, res) => {
     // Prepare file data
     const projectFiles = collectProjectFiles(files);
 
-    // Generate tech stack analysis (AI call)
-    const report = await generateTechStackReport(projectFiles);
+    // Set headers for SSE
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
 
-    return res.status(200).json({
-      success: true,
-      report,
-    });
+    // Generate tech stack analysis (Streamed)
+    await generateTechStackReport(projectFiles, res);
+    
+    // Note: cleanup happens in finally block
 
   } catch (err) {
     console.error("Tech Stack Controller Error:", err);
-
-    // Respect custom status thrown inside Gemini service
-    const status = err.status || 500;
-    const message = err.message || "Failed to generate tech stack report.";
-
-    return res.status(status).json({
-      success: false,
-      message,
-    });
+    if (!res.headersSent) {
+      const status = err.status || 500;
+      return res.status(status).json({
+        success: false,
+        message: err.message || "Failed to generate tech stack report."
+      });
+    } else {
+        res.end();
+    }
 
   } finally {
     if (repoPath) {

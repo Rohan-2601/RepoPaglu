@@ -1,6 +1,52 @@
 import fs from "fs";
 import path from "path";
 
+/**
+ * Generate a visual folder tree string (max depth 2)
+ */
+export function generateFolderTree(files) {
+  const tree = {};
+  
+  for (const file of files) {
+    if (!file.relative) continue;
+    
+    // Normalize path separators
+    const parts = file.relative.replace(/\\/g, "/").split("/");
+    let current = tree;
+    
+    // Limit depth to 2 levels for the visual tree
+    const depth = Math.min(parts.length, 3); 
+    
+    for (let i = 0; i < depth; i++) {
+        const part = parts[i];
+        if (!current[part]) {
+            current[part] = i === depth - 1 && parts.length === depth ? null : {};
+        }
+        current = current[part];
+    }
+  }
+
+  function buildString(node, prefix = "") {
+    let lines = [];
+    const keys = Object.keys(node || {}).sort();
+    
+    keys.forEach((key, index) => {
+        const isLast = index === keys.length - 1;
+        const marker = isLast ? "└── " : "├── ";
+        lines.push(`${prefix}${marker}${key}`);
+        
+        if (node[key]) {
+            const childPrefix = prefix + (isLast ? "    " : "│   ");
+            lines.push(...buildString(node[key], childPrefix));
+        }
+    });
+    
+    return lines;
+  }
+
+  return buildString(tree).join("\n");
+}
+
 const MAX_FILE_SIZE = 100 * 1024; // 100 KB
 const MIN_LINES = 20;
 
@@ -36,16 +82,26 @@ export async function extractAndFilterFiles(repoPath) {
 
   const result = [];
 
-  const walk = (dir) => {
-    const entries = fs.readdirSync(dir, { withFileTypes: true });
+  const walk = (dir, depth = 0) => {
+    if (depth > 20) return; // Prevent stack overflow
+
+    let entries;
+    try {
+        entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch (e) {
+        console.warn(`Skipping dir ${dir}: ${e.message}`);
+        return;
+    }
 
     for (const entry of entries) {
       const full = path.join(dir, entry.name);
 
+      if (entry.isSymbolicLink()) continue; // Skip symlinks
+
       if (entry.isDirectory()) {
         // ignore exact folder names only, not substrings
         if (IGNORED_DIRS.has(entry.name)) continue;
-        walk(full);
+        walk(full, depth + 1);
         continue;
       }
 

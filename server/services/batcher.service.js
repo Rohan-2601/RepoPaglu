@@ -10,20 +10,47 @@ export class Batcher {
     const batches = [];
     let current = [];
 
-    for (const file of this.files) {
-      const filePath = file.relative;
-      const summary = this.summaries[filePath];
+    // FILE FILTERING RULES
+    const IGNORED_EXTENSIONS = new Set([
+      ".json", ".md", ".txt", ".lock", ".svg", ".png", ".jpg", 
+      ".css", ".scss", ".map", ".xml", ".yaml", ".yml"
+    ]);
 
-      // Correct parameter order: (filePath, summary)
+    for (const file of this.files) {
+      const ext = path.extname(file.relative).toLowerCase();
+      const lowerPath = file.relative.toLowerCase();
+
+      // 1. Skip non-code files
+      if (IGNORED_EXTENSIONS.has(ext)) continue;
+
+      // 2. Skip tests, build artifacts, and config
+      if (
+        lowerPath.includes(".test.") || 
+        lowerPath.includes(".spec.") ||
+        lowerPath.includes("node_modules") ||
+        lowerPath.includes("dist/") ||
+        lowerPath.includes("build/")
+      ) {
+        continue;
+      }
+
+      // 3. Skip large files (> 25KB) to save tokens
+      if (file.content.length > 25000) {
+        console.log(`⚠️ Skipping large file: ${file.relative} (${file.content.length} chars)`);
+        continue;
+      }
+
+      const summary = this.summaries[file.relative];
+
       let context = {};
       try {
-        context = await this.rag.getContextForFile(filePath, summary);
+        context = await this.rag.getContextForFile(file.relative, summary);
       } catch (err) {
         console.error("RAG context error:", err.message);
       }
 
       current.push({
-        file: filePath,
+        file: file.relative,
         code: file.content,
         summary,
         context,
