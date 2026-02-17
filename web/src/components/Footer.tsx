@@ -1,5 +1,5 @@
 
-
+import Image from "next/image";
 export default function Footer() {
 
   return (
@@ -7,10 +7,14 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-12 grid grid-cols-1 md:grid-cols-2 gap-10">
 
         {/* Left Section */}
-        <div>
+        <div >
+          <div className="flex items-center gap-1">
+          <Image src="/RepoLogo.png" alt="RepoPaglu" width={50} height={50} />
           <h2 className="text-xl font-semibold tracking-tight text-black dark:text-white">
             RepoPaglu
           </h2>
+          </div>
+          
           <p className="mt-3 text-gray-600 dark:text-gray-400 text-sm max-w-xs leading-relaxed">
             Generate tests, README, and API docs from any GitHub repository in seconds —
             powered by intelligent automation and clean dev tooling.

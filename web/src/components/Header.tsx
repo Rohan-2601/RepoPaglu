@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 export default function Header() {
 
   const [open, setOpen] = useState(false);
@@ -16,12 +16,17 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
 
         {/* Logo */}
+        <div className="flex items-center gap-1 " onClick={() => router.push("/")}>
+          <Image src="/RepoLogo.png" alt="RepoPaglu" width={50} height={50} />
         <Link
           href="/"
           className="text-2xl font-semibold tracking-tight text-black dark:text-white hover:opacity-80 transition"
         >
+          
           RepoPaglu
         </Link>
+        
+        </div> 
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
