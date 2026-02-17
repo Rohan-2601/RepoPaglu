@@ -1,14 +1,11 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-export default function Header() {
 
-  const [open, setOpen] = useState(false);
+export default function Header() {
   const router = useRouter();
 
   return (
@@ -48,37 +45,8 @@ export default function Header() {
         {/* Mobile Actions */}
         <div className="md:hidden flex items-center gap-4">
           <AnimatedThemeToggler />
-          <button
-            className="text-black dark:text-white"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <X size={22} /> : <Menu size={22} />}
-          </button>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden px-6 py-4 space-y-4 bg-white/90 dark:bg-black/80 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800 animate-fadein">
-
-          <Link href="#features" className="block text-black dark:text-white text-lg">
-            Features
-          </Link>
-
-          <Link href="#pricing" className="block text-black dark:text-white text-lg">
-            Pricing
-          </Link>
-
-          {/* Theme Toggle in mobile menu */}
-          <div className="pt-2">
-            <AnimatedThemeToggler />
-          </div>
-
-          <button className="w-full px-5 py-2 rounded-lg bg-black dark:bg-white text-white dark:text-black text-sm transition hover:bg-gray-900 dark:hover:bg-gray-200">
-            Get Started
-          </button>
-        </div>
-      )}
     </header>
   );
 }
