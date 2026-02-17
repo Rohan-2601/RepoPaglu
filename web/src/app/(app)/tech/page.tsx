@@ -386,10 +386,24 @@ export default function TechStackPage() {
 
       // Final parse
       try {
-        const finalJson = JSON.parse(rawAccumulated);
+        let cleanJson = rawAccumulated.replace(/```json/g, "").replace(/```/g, "").trim();
+        const finalJson = JSON.parse(cleanJson);
         setReport(finalJson);
       } catch (e) {
-        setError("Failed to parse analysis results.");
+        console.error("JSON Parse Error:", e);
+        // Fallback: Try to find JSON within the string if it's mixed with other text
+        try {
+            const firstBracket = rawAccumulated.indexOf('{');
+            const lastBracket = rawAccumulated.lastIndexOf('}');
+            if (firstBracket !== -1 && lastBracket !== -1) {
+                const jsonStr = rawAccumulated.substring(firstBracket, lastBracket + 1);
+                setReport(JSON.parse(jsonStr));
+            } else {
+                 throw new Error("No JSON found");
+            }
+        } catch (retryError) {
+             setError("Failed to parse analysis results. Please try again.");
+        }
       }
 
     } catch (err: any) {
@@ -453,19 +467,16 @@ export default function TechStackPage() {
         </button>
       </motion.div>
 
-      {/* Streaming Terminal View */}
+      {/* Premium Loading State */}
       {loading && (
-        <div className="w-full max-w-3xl rounded-xl bg-[#0d1117] border border-gray-800 p-6 shadow-2xl font-mono text-sm overflow-hidden">
-          <div className="flex items-center gap-2 mb-4 border-b border-gray-800 pb-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"/>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"/>
-            <div className="w-3 h-3 rounded-full bg-green-500"/>
-            <span className="ml-2 text-gray-500 text-xs">analysis_terminal — zsh</span>
+        <div className="w-full max-w-3xl space-y-6">
+          <div className="w-full h-12 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
+          <div className="grid grid-cols-2 gap-6">
+             <div className="h-40 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
+             <div className="h-40 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
           </div>
-          <div className="text-green-400 whitespace-pre-wrap break-all h-64 overflow-y-auto font-mono">
-            {streamData}
-            <span className="animate-pulse">_</span>
-          </div>
+          <div className="w-full h-24 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
+          <div className="w-full h-24 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
         </div>
       )}
 

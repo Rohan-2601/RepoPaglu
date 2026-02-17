@@ -1,3 +1,5 @@
+import path from 'path';
+
 export class Batcher {
   constructor(files, summaries, ragEngine) {
     this.files = files;

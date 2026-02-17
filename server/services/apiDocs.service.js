@@ -4,6 +4,8 @@ import { generateWithHF, streamWithHF } from "../llm/groq.js";
 export function extractControllerInfo(files) {
   const controllers = [];
   for (const file of files) {
+      if (file.content.length > 50000) continue; // Skip huge files for regex scan
+
       if (
           file.relative.toLowerCase().includes("controller") || 
           file.relative.toLowerCase().includes("route") ||

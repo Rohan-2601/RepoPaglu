@@ -22,10 +22,13 @@ export const readmeController = async (req, res) => {
 
     // Extract project files
     const files = await extractAndFilterFiles(repoPath);
+    console.log(`✅ Extracted ${files.length} files.`);
 
     // Build dependency graph
     // Build dependency graph (keep this for now, fast enough)
+    console.log("🕸 Building dependency graph...");
     const dependencyGraph = buildDependencyGraph(files, repoPath);
+    console.log("✅ Dependency graph built.");
 
     // --- AUTO-EXTRACT CONTEXT (No LLM) ---
     console.log(" Extracting metadata...");
@@ -67,7 +70,9 @@ export const readmeController = async (req, res) => {
         dependencyGraph 
     };
 
+    console.log("🚀 Starting AI Stream...");
     await generateReadmeContent(context, res);
+    console.log("✅ AI Stream finished.");
 
     // Note: cleanup happens in finally block
     

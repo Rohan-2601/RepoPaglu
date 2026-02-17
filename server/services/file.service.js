@@ -83,7 +83,7 @@ export async function extractAndFilterFiles(repoPath) {
   const result = [];
 
   const walk = (dir, depth = 0) => {
-    if (depth > 20) return; // Prevent stack overflow
+    if (depth > 12) return; // Prevent stack overflow (Reduced from 20)
 
     let entries;
     try {
@@ -100,7 +100,11 @@ export async function extractAndFilterFiles(repoPath) {
 
       if (entry.isDirectory()) {
         // ignore exact folder names only, not substrings
-        if (IGNORED_DIRS.has(entry.name)) continue;
+        if (IGNORED_DIRS.has(entry.name)) {
+             console.log(`Skipping ignored dir: ${entry.name}`);
+             continue;
+        }
+        console.log(`Walking dir: ${full}`);
         walk(full, depth + 1);
         continue;
       }

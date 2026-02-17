@@ -16,12 +16,16 @@ export const apiDocsController = async (req, res) => {
 
     // Clone repository
     repoPath = await cloneRepo(repo);
+    console.log(`✅ Repo logged: ${repoPath}`);
 
     // Extract files
     const files = await extractAndFilterFiles(repoPath);
+    console.log(`✅ Extracted ${files.length} files.`);
 
     // Extract controllers
+    console.log("🔍 Extracting controllers...");
     const controllers = extractControllerInfo(files);
+    console.log(`✅ Found ${controllers.length} controllers.`);
 
     if (!controllers.length) {
       return res.status(400).json({
@@ -36,7 +40,9 @@ export const apiDocsController = async (req, res) => {
     res.setHeader("Connection", "keep-alive");
 
     // Generate API documentation (Streamed)
+    console.log("🚀 Starting API Docs Stream...");
     await generateApiDocs(controllers, res);
+    console.log("✅ API Docs Stream finished.");
 
     // Note: cleanup happens in finally block
 

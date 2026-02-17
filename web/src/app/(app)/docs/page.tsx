@@ -80,13 +80,21 @@ export default function ApiDocsPage() {
 
       // Final parse
       try {
-        const finalJson = JSON.parse(rawAccumulated);
+        let cleanJson = rawAccumulated.replace(/```json/g, "").replace(/```/g, "").trim();
+        const start = cleanJson.indexOf("[");
+        const end = cleanJson.lastIndexOf("]");
+        if (start !== -1 && end !== -1) {
+            cleanJson = cleanJson.substring(start, end + 1);
+        }
+        
+        const finalJson = JSON.parse(cleanJson);
         if (Array.isArray(finalJson)) {
             setDocs(finalJson);
         } else {
             setError("Invalid format returned.");
         }
       } catch (e) {
+        console.error("Docs Parse Error:", e);
         setError("Failed to parse API docs.");
       }
 
@@ -136,19 +144,12 @@ export default function ApiDocsPage() {
         </button>
       </div>
 
-       {/* Streaming Terminal View */}
+      {/* Premium Loading State */}
       {loading && (
-        <div className="mt-10 w-full max-w-3xl rounded-xl bg-[#0d1117] border border-gray-800 p-6 shadow-2xl font-mono text-sm overflow-hidden">
-          <div className="flex items-center gap-2 mb-4 border-b border-gray-800 pb-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"/>
-            <div className="w-3 h-3 rounded-full bg-yellow-500"/>
-            <div className="w-3 h-3 rounded-full bg-green-500"/>
-            <span className="ml-2 text-gray-500 text-xs">api_scanner — zsh</span>
-          </div>
-          <div className="text-blue-400 whitespace-pre-wrap break-all h-64 overflow-y-auto font-mono">
-            {streamData}
-            <span className="animate-pulse">_</span>
-          </div>
+        <div className="mt-10 w-full max-w-4xl space-y-6">
+          <div className="w-full h-16 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
+          <div className="w-full h-16 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
+          <div className="w-full h-16 bg-gray-100 dark:bg-gray-900/60 rounded-xl animate-pulse" />
         </div>
       )}
 

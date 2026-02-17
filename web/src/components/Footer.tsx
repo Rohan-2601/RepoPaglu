@@ -43,7 +43,7 @@ export default function Footer() {
             </li>
             <li>
               <a
-                href="https://x.com/RohanRaj1271853?t=7UFJA4ISCo7zJjW2RKQO7w&s=09"
+                href="https://x.com/rjha72"
                 className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition"
               >
                 Twitter(X)
@@ -56,7 +56,7 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="border-t border-gray-200 dark:border-gray-800 py-4 text-center text-gray-500 dark:text-gray-400 text-sm">
-        Built with ❤️ by Rohan
+        Built by a developer for developers.
       </div>
     </footer>
   );

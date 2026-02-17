@@ -1,4 +1,4 @@
-import { generateWithHF } from "../llm/groq.js";
+import { generateWithHF, streamWithHF } from "../llm/groq.js";
 
 /**
  * Collect content from project files
@@ -81,6 +81,10 @@ Analyze the following project files and return a STRICT JSON OBJECT describing t
 - Infer technologies from filenames, imports, and patterns.
 - Identify Express patterns, multer, cloudinary, mongoose, JWT, bcrypt, etc.
 - Do NOT add explanations outside JSON.
+- **CRITICAL:** You MUST provide at least 3 distinct items for "strengths", "weaknesses", and "recommendations".
+- For "strengths", focus on architecture, modernization, and best practices.
+- For "weaknesses", look for security risks, scalability issues, or outdated patterns.
+- For "recommendations", suggest specific libraries, architectural changes, or performance improvements.
 
 ### PROJECT FILES:
 ${projectFiles
