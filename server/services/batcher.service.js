@@ -55,7 +55,7 @@ export class Batcher {
         file: file.relative,
         code: file.content,
         summary,
-        context,
+        context: {} // disable RAG for now
       });
 
       if (current.length >= this.batchSize) {

@@ -4,34 +4,36 @@ import { generateWithHF, streamWithHF } from "../llm/groq.js";
  * Generate README.md content using Hugging Face (Streamed)
  */
 export async function generateReadmeContent(context, res) {
-  const { packageJson, fileTree, keyModules } = context;
-
   const prompt = `
-Write a clean, professional README.md for this project.
+You are generating a README based ONLY on provided structured data.
 
-### Project Metadata
-**Package.json**: 
-\`\`\`json
-${packageJson.slice(0, 5000)}
-\`\`\`
+You MUST NOT invent anything.
+If information is missing, state "Not specified".
 
-**Project Structure**:
-\`\`\`text
-${fileTree}
-\`\`\`
+### PROJECT NAME:
+${context.projectName}
 
-**Key Modules/Folders**:
-${keyModules.join(", ")}
+### DESCRIPTION:
+${context.description}
 
-### Guidelines:
-- Use the package.json to identify Name, Description, Scripts, and Dependencies.
-- Use the Folder Tree to explain the project structure.
-- Write a professional "Features" section based on dependencies (e.g. Express = Web Server, React = UI).
-- Include standard sections: Install, Usage, API (if applicable), Tech Stack.
+### SCRIPTS:
+${context.scripts.join(", ") || "None"}
+
+### DEPENDENCIES:
+${context.dependencies.join(", ") || "None"}
+
+### PROJECT STRUCTURE:
+${context.fileTree}
+
+### RULES:
+- Do NOT assume technologies.
+- Do NOT invent features.
+- Only describe what is explicitly listed above.
 - Keep it concise.
+- Do not use marketing language.
 
-Begin now:
-`.trim();
+Generate the README now.
+`;
 
   try {
     if (res) {
@@ -55,7 +57,7 @@ Begin now:
     }
 
   } catch (error) {
-    console.error("🔥 AI README Generator Error:", error);
+    console.error(" AI README Generator Error:", error);
     if (res) {
        res.write(`data: ${JSON.stringify({ error: "Failed to generate README" })}\n\n`);
        res.end();

@@ -78,8 +78,18 @@ Analyze the following project files and return a STRICT JSON OBJECT describing t
 ### IMPORTANT RULES:
 - RETURN STRICT JSON ONLY. NO MARKDOWN. NO BACKTICKS.
 - If something is unknown, return an empty array or empty string.
-- Infer technologies from filenames, imports, and patterns.
-- Identify Express patterns, multer, cloudinary, mongoose, JWT, bcrypt, etc.
+
+- RETURN STRICT JSON ONLY.
+- ONLY report technologies that are explicitly found in:
+  - package.json dependencies
+  - lock files
+  - actual import statements
+  - config files
+- If not explicitly found, return empty.
+- DO NOT guess.
+- DO NOT infer.
+- DO NOT assume.
+
 - Do NOT add explanations outside JSON.
 - **CRITICAL:** You MUST provide at least 3 distinct items for "strengths", "weaknesses", and "recommendations".
 - For "strengths", focus on architecture, modernization, and best practices.

@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+import path from "path";
 import { cloneRepo, cleanupTemp } from "../services/repo.service.js";
 import { extractAndFilterFiles } from "../services/file.service.js";
 import { collectProjectFiles, generateTechStackReport } from "../services/techStack.service.js";
@@ -29,7 +31,19 @@ export const techStackController = async (req, res) => {
     }
 
     // Prepare file data
+    let packageJsonContent = "";
+    try {
+      const pkgPath = path.join(repoPath, "package.json");
+      packageJsonContent = await fs.readFile(pkgPath, "utf-8");
+    } catch {
+      packageJsonContent = "";
+    }
+
     const projectFiles = collectProjectFiles(files);
+    projectFiles.push({
+      file: "package.json",
+      summary: packageJsonContent
+    });
 
     // Set headers for SSE
     res.setHeader("Content-Type", "text/event-stream");

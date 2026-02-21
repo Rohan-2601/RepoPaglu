@@ -3,6 +3,8 @@ import { extractAndFilterFiles, generateFolderTree } from "../services/file.serv
 import { buildDependencyGraph } from "../services/dependency.service.js";
 import { generateSummary } from "../services/summary.service.js";
 import { generateReadmeContent } from "../services/readme.service.js";
+import fs from "fs/promises";
+import path from "path";
 
 export const readmeController = async (req, res) => {
   let repoPath = null;
@@ -39,13 +41,23 @@ export const readmeController = async (req, res) => {
     // For now, let's assume we might need to read it manually if not in `files`
     let packageJson = "{}";
     try {
-        const fs = await import("fs/promises");
-        const path = await import("path");
-        const pkgPath = path.join(repoPath, "package.json");
-        packageJson = await fs.readFile(pkgPath, "utf-8");
-    } catch (e) {
-        console.warn("No package.json found");
+      const pkgPath = path.join(repoPath, "package.json");
+      packageJson = await fs.readFile(pkgPath, "utf-8");
+    } catch {
+      packageJson = "{}";
     }
+
+    let pkg = {};
+    try {
+      pkg = JSON.parse(packageJson);
+    } catch {
+      pkg = {};
+    }
+
+    const projectName = pkg.name || "Project Name not defined";
+    const description = pkg.description || "No description provided.";
+    const scripts = pkg.scripts ? Object.keys(pkg.scripts) : [];
+    const dependencies = pkg.dependencies ? Object.keys(pkg.dependencies) : [];
 
     // 2. Folder Tree
     const fileTree = generateFolderTree(files);
@@ -64,10 +76,13 @@ export const readmeController = async (req, res) => {
 
     // Generate README content (Streamed)
     const context = {
-        packageJson,
-        fileTree,
-        keyModules,
-        dependencyGraph 
+      projectName,
+      description,
+      scripts,
+      dependencies,
+      fileTree,
+      keyModules,
+      dependencyGraph 
     };
 
     console.log("🚀 Starting AI Stream...");
