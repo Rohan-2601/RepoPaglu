@@ -1,6 +1,4 @@
 import Groq from "groq-sdk";
-import { createBatchPrompt } from "./prompt.js";
-
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
@@ -10,7 +8,8 @@ export async function generateWithHF(prompt) {
   const res = await groq.chat.completions.create({
   model: "llama-3.1-8b-instant",
   messages: [{ role: "user", content: prompt }],
-  temperature: 0.2,
+  temperature: 0,
+    top_p: 1,
   max_tokens: 1200,
 });
 
@@ -22,7 +21,8 @@ export async function streamWithHF(prompt) {
   const stream = await groq.chat.completions.create({
     model: "llama-3.1-8b-instant",
     messages: [{ role: "user", content: prompt }],
-    temperature: 0.2,
+    temperature: 0,
+    top_p: 1,
     max_tokens: 2000,
     stream: true,
   });
@@ -30,21 +30,3 @@ export async function streamWithHF(prompt) {
   return stream;
 }
 
-
-export async function generateTestsForBatch(batch) {
-  const prompt = createBatchPrompt(batch);
-  const output = await generateWithHF(prompt);
-
-  const tests = [];
-  for (const line of output.split("\n")) {
-    const clean = line.trim();
-    if (!clean.startsWith("{")) continue;
-
-    try {
-      const obj = JSON.parse(clean);
-      if (obj.file && obj.test) tests.push(obj);
-    } catch {}
-  }
-
-  return tests;
-}

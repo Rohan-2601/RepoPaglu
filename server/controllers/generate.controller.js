@@ -76,8 +76,19 @@ export const generateController = async (req, res) => {
       });
     }
 
+    const validatedTests = testFiles.filter(t => {
+      const summary = summaries[t.file];
+      if (!summary) return false;
+
+      const exportedNames = summary.match(/function\s+(\w+)/g) || [];
+
+      return exportedNames.some(name =>
+        t.test.includes(name.split(" ")[1])
+      );
+    });
+
     // Create zip buffer
-    const zipBuffer = await createZipBuffer(testFiles);
+    const zipBuffer = await createZipBuffer(validatedTests);
 
     // Send ZIP
     res.set({
